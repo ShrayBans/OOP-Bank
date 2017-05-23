@@ -100,8 +100,13 @@ Input Number: """
 
 
     def ask_bank_info(self):
-        person = input('Enter your name: ')
-        print("Your name is {}".format(person))
+        message = '''
+What would you like to learn about today?
+1 - How can I deposit money into an account?
+Input Number: '''
+        input_number = validateInputNumber(message, [1])
+        if input_number == 1:
+            print("First you must add an account. Then, you can see me to deposit some money into that account.")
 
     def ask_general_info(self):
         message = '''
@@ -111,13 +116,13 @@ Hello! What would you like to do today?
 2 - Withdraw Money From Account ** TODO **
 3 - Deposit Money To Account
 4 - Check Accrued Interest of Accounts
-5 - Ask For Bank Information ** TODO **
+5 - Ask For Bank Information ** IN PROGRESS **
 6 - Switch Users
 7 - Leave Bank (Exit Program)
 Input Number: '''
         input_number = validateInputNumber(message, [1, 2, 3, 4, 5, 6])
         if input_number == 1:
-            Teller.add_account(self, )
+            Teller.add_account(self)
         if input_number == 2:
             Teller.withdraw(self)
         if input_number == 3:
