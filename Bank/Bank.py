@@ -20,6 +20,14 @@ class MoneyMediator:
         if len(self.users) == 1:
             self.current_user = self.users[0]
 
+    def check_interest(self):
+        if len(self.bank_accounts) < 1:
+            print("Sorry you have no bank accounts!")
+            return False
+
+        for account in self.bank_accounts:
+            print("{}: {} dollars of interest".format(str(account), account.calculate_interest()))
+
     def switch_users(self):
         print("Your user is currently a(n) {}".format(str(self.current_user)))
         message = """
@@ -51,11 +59,14 @@ Input Number: """
         input_amount = validatePositiveNumber("Please specify an amount you would like to start your account with: ")
         if input_number == 1:
             new_acc = CDAccount(input_amount, self)
+            self.current_user.subtract_amount(input_amount)
             self.bank_accounts.append(new_acc)
         if input_number == 2:
+            self.current_user.subtract_amount(input_amount)
             new_acc = CheckingsAccount(input_amount, self)
             self.bank_accounts.append(new_acc)
         if input_number == 3:
+            self.current_user.subtract_amount(input_amount)
             new_acc = SavingsAccount(input_amount, self)
             self.bank_accounts.append(new_acc)
 
@@ -83,6 +94,7 @@ Input Number: """
                 if account.get_acct_num() == account_num:
                     deposit_amount = validatePositiveNumber("Please specify an amount you would like to deposit: ")
                     account.add_amount(deposit_amount)
+                    self.current_user.subtract_amount(deposit_amount)
                     print("{} has been deposited to Account #{} to make the total {}".format(deposit_amount, account_num, account.get_amount()))
                     notFound = False
 
@@ -98,9 +110,10 @@ Hello! What would you like to do today?
 1 - Add Account
 2 - Withdraw Money From Account ** TODO **
 3 - Deposit Money To Account
-4 - Ask For Bank Information ** TODO **
-5 - Switch Users
-6 - Leave Bank (Exit Program)
+4 - Check Accrued Interest of Accounts
+5 - Ask For Bank Information ** TODO **
+6 - Switch Users
+7 - Leave Bank (Exit Program)
 Input Number: '''
         input_number = validateInputNumber(message, [1, 2, 3, 4, 5, 6])
         if input_number == 1:
@@ -110,10 +123,12 @@ Input Number: '''
         if input_number == 3:
             Teller.deposit(self)
         if input_number == 4:
-            Teller.ask_bank_info(self)
+            Teller.check_interest(self)
         if input_number == 5:
-            Teller.switch_users(self)
+            Teller.ask_bank_info(self)
         if input_number == 6:
+            Teller.switch_users(self)
+        if input_number == 7:
             exit()
 
 def validateInputNumber(inputNumMessage, possible_nums):
@@ -148,9 +163,18 @@ def validatePositiveNumber(inputNumMessage):
 class User:
     def __init__(self, teller):
         self._teller = teller
+        self.cash_balance = 10000
 
     def __str__(self):
-        return self._type
+        return "{} with {} dollars".format(self._type, self.cash_balance)
+
+    def subtract_amount(self, amount):
+        self.cash_balance -= amount
+        print("User now has {} dollars".format(self.cash_balance))
+
+    def add_amount(self, amount):
+        self.cash_balance += amount
+        print("User now has {} dollars").format(self.cash_balance)
 
 class Adult(User):
     def __init__(self, teller):
@@ -185,13 +209,17 @@ class BankAccount:
         self._account_balance += amount
         return self._account_balance
 
+    # TODO: need to factor in time into the calculation
+    def calculate_interest(self):
+        return self.interest_rate * self._account_balance
+
 class CDAccount(BankAccount):
     def __init__(self, init_amount, teller):
         super().__init__(init_amount, teller)
         self.interest_rate = 0.05
 
     def __str__(self):
-        return "CD Account #{} with a {} dollar balance".format(self._account_num, self._account_balance)
+        return "CD Account #{} - {} dollar balance".format(self._account_num, self._account_balance)
 
 class SavingsAccount(BankAccount):
     def __init__(self, init_amount, teller):
@@ -199,7 +227,7 @@ class SavingsAccount(BankAccount):
         self.interest_rate = 0.02
 
     def __str__(self):
-        return "Savings Account #{} with a {} dollar balance".format(self._account_num, self._account_balance)
+        return "Savings Account #{} - {} dollar balance".format(self._account_num, self._account_balance)
 
 class CheckingsAccount(BankAccount):
     def __init__(self, init_amount, teller):
@@ -207,7 +235,7 @@ class CheckingsAccount(BankAccount):
         self.interest_rate = 0.005
 
     def __str__(self):
-        return "Checkings Account #{} with a {} dollar balance".format(self._account_num, self._account_balance)
+        return "Checkings Account #{} - {} dollar balance".format(self._account_num, self._account_balance)
 
 
 
